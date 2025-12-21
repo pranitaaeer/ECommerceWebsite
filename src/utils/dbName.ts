@@ -1,0 +1,1 @@
+export const DBNAME="Ecommerce_24"
