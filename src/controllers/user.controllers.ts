@@ -55,8 +55,8 @@ export const getAllUsers = AsyncHandler(async (req, res, next) => {
 });
 
 export const getUser = AsyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const user = await User.findById(id);
+  const {userId} = req.params;
+  const user = await User.findById(userId);
 
   if (!user) return next(new ErrorHandler("Invalid Id", 400));
 
@@ -67,8 +67,8 @@ export const getUser = AsyncHandler(async (req, res, next) => {
 });
 
 export const deleteUser = AsyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const user = await User.findById(id);
+  const {userId} = req.params;
+  const user = await User.findById(userId);
 
   if (!user) return next(new ErrorHandler("Invalid Id", 400));
 
