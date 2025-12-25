@@ -59,8 +59,8 @@ const OrderSchema = new Schema(
 
     orderItems: [
       {
-        name: String,
-        photo: String,
+        ProductName: String,
+        ProductImage: String,
         price: Number,
         quantity: Number,
         productId: {
