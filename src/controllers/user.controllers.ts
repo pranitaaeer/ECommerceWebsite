@@ -12,7 +12,7 @@ export const newUser = AsyncHandler(
     res: Response,
     next: NextFunction
   ) => {
-    const { name, email, photo, gender, _id, dob } = req.body;
+    const { username, email, Avatar, gender, _id, dob } = req.body;
 
     let user = await User.findById(_id);
 
@@ -22,7 +22,7 @@ export const newUser = AsyncHandler(
         message: `Welcome, ${user.name}`,
       });
 
-    if ([_id, name, email, photo, gender].some((elem) => elem.trim() === "")) {
+    if ([_id, username, email, Avatar, gender].some((elem) => elem.trim() === "")) {
       return next(new ErrorHandler("All fields are required", 400));
     }
 
@@ -30,9 +30,9 @@ export const newUser = AsyncHandler(
 
 
     user = await User.create({
-      name,
+      username,
       email,
-      photo,
+      Avatar,
       gender,
       _id,
       dob: new Date(dob),

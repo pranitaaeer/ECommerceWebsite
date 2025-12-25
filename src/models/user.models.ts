@@ -21,7 +21,7 @@ const UserSchema = new Schema(
       type: String,
       required: [true, "Please enter ID"],
     },
-    name: {
+    username: {
       type: String,
       required: [true, "Please enter Name"],
     },
@@ -31,7 +31,7 @@ const UserSchema = new Schema(
       required: [true, "Please enter Name"],
       validate: validator.default.isEmail,
     },
-    photo: {
+    Avatar: {
       type: String,
       required: [true, "Please add Photo"],
     },
