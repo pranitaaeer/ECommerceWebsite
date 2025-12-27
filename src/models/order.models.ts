@@ -1,6 +1,21 @@
 import mongoose,{Schema} from "mongoose";
+import {ShippingInfoType,OrderItemType} from "../types/types.js";
 
-const OrderSchema = new Schema(
+interface IOrder extends Document{
+    shippingInfo: ShippingInfoType;
+    user: string;
+    subtotal: number;
+    tax: number;
+    shippingCharges: number;
+    discount: number;
+    total: number;
+    orderItems: OrderItemType[];
+    status:"Processing" | "Shipped" |"Delivered";
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+const OrderSchema = new Schema<IOrder>(
   {
     shippingInfo: {
       address: {
@@ -75,4 +90,4 @@ const OrderSchema = new Schema(
   }
 );
 
-export const Order = mongoose.model("Order", OrderSchema);
+export const Order = mongoose.model<IOrder>("Order", OrderSchema);

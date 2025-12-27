@@ -45,3 +45,42 @@ export interface NewOrderRequestBody {
   orderItems: OrderItemType[];
 }
 
+export type InvalidateCacheProps = {
+  product?: boolean;
+  order?: boolean;
+  admin?: boolean;
+  review?: boolean;
+  userId?: string;
+  orderId?: string;
+  productId?: string | string[];
+};
+export type SearchRequestQuery = {
+  search?: string;
+  price?: string;
+  category?: string;
+  sort?: string;
+  page?: string;
+};
+
+export interface BaseQuery {
+  name?: {
+    $regex: string;
+    $options: string;
+  };
+  price?: { $lte: number };
+  category?: string;
+}
+
+export interface NewPaymentRequestBody{
+  items: OrderItemType[];
+  shippingInfo: ShippingInfoType | undefined;
+  coupon: string | undefined;
+}
+export interface NewProductRequestBody {
+  ProductName: string;
+  category: string;
+  price: number;
+  stock: number;
+  description: string;
+}
+

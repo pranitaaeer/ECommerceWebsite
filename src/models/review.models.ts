@@ -1,5 +1,13 @@
 import mongoose,{Schema} from "mongoose";
 
+interface IReview extends Document{
+  comment:string;
+  rating:number;
+  user:string;
+  product:mongoose.ObjectId // TODO
+  createdAt: Date;
+  updatedAt: Date;
+}
 const ReviewSchema = new Schema(
   {
     comment: {
@@ -26,4 +34,4 @@ const ReviewSchema = new Schema(
   { timestamps: true }
 );
 
-export const Review = mongoose.model("Review", ReviewSchema);
+export const Review = mongoose.model<IReview>("Review", ReviewSchema);

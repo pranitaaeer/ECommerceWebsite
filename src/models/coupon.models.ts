@@ -1,6 +1,9 @@
-import mongoose,{Schema} from "mongoose"
-
-const CouponSchema = new Schema({
+import mongoose,{Document,Schema} from "mongoose"
+interface  ICoupon extends Document{
+ code:string;
+ amount:number;
+} 
+const CouponSchema = new Schema<ICoupon>({
   code: {
     type: String,
     required: [true, "Please enter the Coupon Code"],
@@ -12,4 +15,4 @@ const CouponSchema = new Schema({
   },
 });
 
-export const Coupon = mongoose.model("Coupon", CouponSchema);
+export const Coupon = mongoose.model<ICoupon>("Coupon", CouponSchema);

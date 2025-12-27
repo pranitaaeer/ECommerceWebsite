@@ -1,11 +1,11 @@
-import mongoose,{Schema} from "mongoose";
+import mongoose,{Document, Schema} from "mongoose";
 import validator from "validator";
 
 interface IUser extends Document {
   _id: string;
-  name: string;
+  username: string;
   email: string;
-  photo: string;
+  Avatar: string;
   role: "admin" | "user";
   gender: "male" | "female";
   dob: Date;
@@ -14,8 +14,9 @@ interface IUser extends Document {
   //   Virtual Attribute
   age: number;
 }
+//TODO
 
-const UserSchema = new Schema(
+const UserSchema= new Schema(
   {
     _id: {
       type: String,
@@ -25,7 +26,7 @@ const UserSchema = new Schema(
       type: String,
       required: [true, "Please enter Name"],
     },
-    email: {
+     email:{
       type: String,
       unique: [true, "Email already Exist"],
       required: [true, "Please enter Name"],
