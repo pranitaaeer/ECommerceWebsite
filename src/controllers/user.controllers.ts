@@ -1,25 +1,17 @@
-import { NextFunction, Request, Response } from "express";
 import { User } from "../models/user.models.js";
 import { SignupRequestBody } from "../types/types.js";
 import { AsyncHandler } from "../middlewares/error.js";
 import ErrorHandler from "../utils/utility-class.js";
 
-export const newUser = AsyncHandler(
-  async (
-    // {}-> for params ,{}-> for response and third will be for request 
-    // so need to get data from req.body that's why customise it
-    req: Request<{}, {}, SignupRequestBody>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const { username, email, Avatar, gender, _id, dob } = req.body;
+export const newUser = AsyncHandler(async (req,res,next) => {
+    const { username, email, Avatar, gender, _id, dob }:SignupRequestBody = req.body;
 
     let user = await User.findById(_id);
 
     if (user)
       return res.status(200).json({
         success: true,
-        message: `Welcome, ${user.name}`,
+        message: `Welcome, ${user.username}`,
       });
 
     if ([_id, username, email, Avatar, gender].some((elem) => elem.trim() === "")) {
@@ -40,7 +32,7 @@ export const newUser = AsyncHandler(
 
     return res.status(201).json({
       success: true,
-      message: `Welcome, ${user.name}`,
+      message: `Welcome, ${user.username}`,
     });
   }
 );
