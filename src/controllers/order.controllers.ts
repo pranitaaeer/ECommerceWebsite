@@ -1,4 +1,3 @@
-import { Request } from "express";
 import { redis, redisTTL } from "../app.js";
 import { AsyncHandler } from "../middlewares/error.js";
 import { Order } from "../models/order.models.js";
@@ -66,8 +65,7 @@ export const getSingleOrder = AsyncHandler(async (req, res, next) => {
   });
 });
 
-export const newOrder = AsyncHandler(
-  async (req: Request<{}, {}, NewOrderRequestBody>, res, next) => {
+export const newOrder = AsyncHandler(async (req, res, next) => {
     const {
       shippingInfo,
       orderItems,
@@ -77,7 +75,7 @@ export const newOrder = AsyncHandler(
       shippingCharges,
       discount,
       total,
-    } = req.body;
+    }:NewOrderRequestBody= req.body;
 
     if ([shippingInfo, orderItems, user, subtotal, tax, total].some((elem) => !elem)) {
       return next(new ErrorHandler("All Fields are required", 400));
