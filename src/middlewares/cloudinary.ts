@@ -1,0 +1,55 @@
+import { UploadApiResponse, v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
+
+const getBase64 = (file: Express.Multer.File) =>{
+  const data=`data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+  return data
+}
+
+export const uploadToCloudinary=async(files:Express.Multer.File[])=>{
+  if(!files || files.length===0) return null
+ 
+   let response=[]
+   for(const file of files){
+    const filePath= getBase64(file) 
+    const result:UploadApiResponse= await cloudinary.uploader.upload(filePath,{
+      folder:"e-com-assests",
+      resource_type:"auto"
+    })
+     
+    if(result){
+     response.push({
+     public_id:result.public_id,
+     url:result.secure_url
+    })
+    }
+    else{
+      console.log("error to upload image to cloudinary")
+      throw new Error("error to upload image to cloudinary")
+    }
+   }
+   
+   console.log("response of cloudinary:",response)
+   return response.map((i) => ({
+    public_id: i.public_id,
+    url: i.url,
+  }));
+}
+
+export const deleteFromCloudinary=async(publicIds:string[])=>{
+  if(!publicIds) return null
+   for(const id of publicIds){
+   await cloudinary.uploader.destroy(id,(err,result)=>{
+    if(err) {
+      console.log("error to delete image from cloudinary",err)
+      throw new Error("error to delete image from cloudinary")
+    }
+    if(result) console.log("delete image from cloudinary") 
+   })
+   }
+}
