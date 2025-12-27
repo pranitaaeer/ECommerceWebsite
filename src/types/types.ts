@@ -76,7 +76,7 @@ export interface NewPaymentRequestBody{
   shippingInfo: ShippingInfoType | undefined;
   coupon: string | undefined;
 }
-export interface NewProductRequestBody {
+export interface ProductRequestBody {
   ProductName: string;
   category: string;
   price: number;

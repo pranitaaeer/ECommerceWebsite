@@ -1,6 +1,6 @@
 import mongoose,{Document, Schema} from "mongoose";
 
-interface IProductImage extends Document{
+export interface IProductImage extends Document{
   public_id:string;
   url:string;
 }
