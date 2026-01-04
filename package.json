@@ -8,7 +8,7 @@
     "start": "node dist/app.js",
     "build": "tsc",
     "watch": "tsc -w",
-    "dev": "nodemon dist/app.js"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules dist/app.js"
   },
   "author": "",
   "license": "ISC",

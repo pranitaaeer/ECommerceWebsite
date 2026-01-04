@@ -5,7 +5,7 @@ import { AsyncHandler } from "./error.js";
 // Middleware to make sure only admin is allowed
 export const adminOnly = AsyncHandler(async (req, res, next) => {
   const { id } = req.query;
-
+  console.log("id:", id);
   if (!id) return next(new ErrorHandler("Please Login", 401));
 
   const user = await User.findById(id);

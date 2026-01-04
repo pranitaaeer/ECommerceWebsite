@@ -17,7 +17,7 @@ const stripeKey = process.env.STRIPE_KEY || "";
 const redisURI = process.env.REDIS_URI || "";
 const clientURL = process.env.CLIENT_URL || "";
 export const redisTTL = process.env.REDIS_TTL || 60 * 60 * 4;
-
+console.log("cloudinary api key:",process.env.CLOUD_API_KEY || " ")
 console.log(redisURI)
 await connectDB(mongoURI);
 
@@ -30,6 +30,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+app.use(express.static("uploads"));
 app.use(
   cors({
     origin: [clientURL],

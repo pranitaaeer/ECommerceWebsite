@@ -1,4 +1,4 @@
 import multer from "multer";
 
-export const singleUpload = multer().single("photo");
-export const mutliUpload = multer().array("photos", 5);
+export const singleUpload = multer().single("ProductImage");
+export const mutliUpload = multer().array("ProductImage", 5);

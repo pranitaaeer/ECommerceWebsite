@@ -1,3 +1,4 @@
+
 import { UploadApiResponse, v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -5,10 +6,10 @@ cloudinary.config({
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
-
+ console.log("cloud api key:",process.env.CLOUD_API_SECRET)
 const getBase64 = (file: Express.Multer.File) =>{
-  const data=`data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
-  return data
+  const filePath = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+  return filePath;
 }
 
 export const uploadToCloudinary=async(files:Express.Multer.File[])=>{
@@ -18,7 +19,7 @@ export const uploadToCloudinary=async(files:Express.Multer.File[])=>{
    for(const file of files){
     const filePath= getBase64(file) 
     const result:UploadApiResponse= await cloudinary.uploader.upload(filePath,{
-      folder:"e-com-assests",
+      folder:"uploads",
       resource_type:"auto"
     })
      
@@ -40,6 +41,9 @@ export const uploadToCloudinary=async(files:Express.Multer.File[])=>{
     url: i.url,
   }));
 }
+
+
+
 
 export const deleteFromCloudinary=async(publicIds:string[])=>{
   if(!publicIds) return null
