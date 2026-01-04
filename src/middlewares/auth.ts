@@ -11,7 +11,7 @@ export const adminOnly = AsyncHandler(async (req, res, next) => {
   const user = await User.findById(id);
   if (!user) return next(new ErrorHandler("Invalid User Id", 401));
   if (user.role !== "admin")
-    return next(new ErrorHandler("Unauthorized User", 403));
+    return next(new ErrorHandler("Unauthorized User because you are not admin", 403));
 
   next();
 });

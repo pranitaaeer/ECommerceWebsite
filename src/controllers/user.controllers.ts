@@ -5,7 +5,7 @@ import ErrorHandler from "../utils/utility-class.js";
 
 export const newUser = AsyncHandler(async (req,res,next) => {
     const { username, email, Avatar, gender, _id, dob }:SignupRequestBody = req.body;
-
+    console.log("req.body:", req.body);
     let user = await User.findById(_id);
 
     if (user)
@@ -14,9 +14,9 @@ export const newUser = AsyncHandler(async (req,res,next) => {
         message: `Welcome, ${user.username}`,
       });
 
-    if ([_id, username, email, Avatar, gender].some((elem) => elem.trim() === "")) {
-      return next(new ErrorHandler("All fields are required", 400));
-    }
+   if ([_id, username, email, gender].some((elem) => elem === "  ")) {
+     return next(new ErrorHandler("All fields are required", 400));
+}
 
     if (!dob) return next(new ErrorHandler("Date of Birth is required", 400));
 
@@ -50,7 +50,7 @@ export const getUser = AsyncHandler(async (req, res, next) => {
   const {userId} = req.params;
   const user = await User.findById(userId);
 
-  if (!user) return next(new ErrorHandler("Invalid Id", 400));
+  if (!user) return next(new ErrorHandler("User not found", 400));
 
   return res.status(200).json({
     success: true,

@@ -29,12 +29,12 @@ const UserSchema= new Schema(
      email:{
       type: String,
       unique: [true, "Email already Exist"],
-      required: [true, "Please enter Name"],
+      required: [true, "Please enter email"],
       validate: validator.default.isEmail,
     },
     Avatar: {
       type: String,
-      required: [true, "Please add Photo"],
+      required: [true, "Please add Avatar"],
     },
     role: {
       type: String,
