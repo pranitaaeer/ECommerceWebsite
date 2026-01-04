@@ -14,12 +14,11 @@ export const newUser = AsyncHandler(async (req,res,next) => {
         message: `Welcome, ${user.username}`,
       });
 
-   if ([_id, username, email, gender].some((elem) => elem === "  ")) {
+   if ([_id, username, email, gender].some((elem) =>  !elem || elem === "  ")) {
      return next(new ErrorHandler("All fields are required", 400));
-}
+     }
 
     if (!dob) return next(new ErrorHandler("Date of Birth is required", 400));
-
 
     user = await User.create({
       username,
