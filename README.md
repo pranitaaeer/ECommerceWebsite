@@ -1,19 +1,24 @@
 ﻿
-# MERN-STACK E-COMMERCE PLATFORM
+# MERN-STACK E-COMMERCE PLATFORM 🛒
+Radhe Radhe! 🙏
+My name is Pranita Shatrughna Aeer, and I built this MERN stack project as my final year BCA submission.
 
-Radhe Radhe! My name is **Pranita Shatrughna Aeer**, I created this MERN stack project for my final year of BCA.
+# Prerequisites 📌 
+Before running the project, ensure you have a basic understanding of:
+- Node.js
+- React.js
+- Express.js
+- MongoDB
+- TypeScript
 
-# Prerequisite
+⚙️ Installation
+# Install dependencies
+npm install
 
-1.  Must have basic knowledge of **Node**, **React**, **Express**, **MongoDB** ,**Typescript**
+# Build the backend
+npm run build
 
-
-# Install Dependencies
-
-**For Backend** - `npm i && npm run build`
-
-
-## Env Variables
+# Env Variables 🔑
 
 Make Sure to Create a  .env file in root directory and add appropriate variables in order to use the app.
 
@@ -31,6 +36,20 @@ CLIENT_URL=`http://localhost:5173 (common for VITE projects) or http://localhost
 
 _fill each filed with your info respectively_
 
+# Features 🚀
+- User authentication & authorization
+- Product listing with pagination
+- Secure payment integration using Stripe
+- Image upload & management via Cloudinary
+- Caching with Redis for optimized performance
+- Responsive frontend built with React
+
+# Tech Stack 🛠️
+- Backend: Node.js, Express.js
+- Database: MongoDB Atlas
+- Cache: Redis Cloud
+- Image Hosting: Cloudinary
+- Payments: Stripe
 
 
 
