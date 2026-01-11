@@ -83,4 +83,8 @@ export interface ProductRequestBody {
   stock: number;
   description: string;
 }
+export interface CouponRequestBody {
+  code: string;
+  amount: number;
+}
 

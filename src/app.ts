@@ -17,8 +17,6 @@ const stripeKey = process.env.STRIPE_KEY || "";
 const redisURI = process.env.REDIS_URI || "";
 const clientURL = process.env.CLIENT_URL || "";
 export const redisTTL = process.env.REDIS_TTL || 60 * 60 * 4;
-console.log("cloudinary api key:",process.env.CLOUD_API_KEY || " ")
-console.log(redisURI)
 await connectDB(mongoURI);
 
 export const redis = connectRedis(redisURI);
@@ -61,5 +59,5 @@ app.use("/uploads", express.static("uploads"));
 app.use(errorMiddleware);
 
 app.listen(port, () => {
-  console.log(`Express is working on:${port}`);
+  console.log(`app is working on port:${port}`);
 });
