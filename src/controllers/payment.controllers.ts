@@ -50,6 +50,7 @@ export const createPaymentIntent = AsyncHandler(async (req, res, next) => {
     amount: total * 100,
     currency: "inr",
     description: "MERN-Ecommerce",
+    payment_method_types: ["card"],
     shipping: {
       name: user.username,
       address: {

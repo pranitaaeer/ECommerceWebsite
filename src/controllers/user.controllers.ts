@@ -5,13 +5,15 @@ import ErrorHandler from "../utils/utility-class.js";
 
 export const newUser = AsyncHandler(async (req,res,next) => {
     const { username, email, Avatar, gender, _id, dob }:SignupRequestBody = req.body;
-    console.log("req.body:", req.body);
+    console.log("req.body:", req.body)
+    console.log(username, email, Avatar, gender, _id, dob)
     let user = await User.findById(_id);
 
     if (user)
       return res.status(200).json({
         success: true,
         message: `Welcome, ${user.username}`,
+        user
       });
 
    if ([_id, username, email, gender].some((elem) =>  !elem || elem === "  ")) {
@@ -32,6 +34,7 @@ export const newUser = AsyncHandler(async (req,res,next) => {
     return res.status(201).json({
       success: true,
       message: `Welcome, ${user.username}`,
+      user
     });
   }
 );
