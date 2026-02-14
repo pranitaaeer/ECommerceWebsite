@@ -2,6 +2,7 @@ import express from "express";
 import { adminOnly } from "../middlewares/auth.js";
 import {
   allOrders,
+  cancleOrder,
   deleteOrder,
   getSingleOrder,
   myOrders,
@@ -22,6 +23,7 @@ app.get("/all", adminOnly, allOrders);
 
 app.get("/:orderId",getSingleOrder)
 app.put("/:orderId",adminOnly, processOrder)
+app.delete("/:orderId/cancle", cancleOrder);
 app.delete("/:orderId",adminOnly, deleteOrder);
 
 export default app;

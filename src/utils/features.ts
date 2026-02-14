@@ -22,6 +22,51 @@ export const findAverageRatings = async (
   };
 };
 
+// export const invalidateCache = async ({
+//   product,
+//   order,
+//   admin,
+//   review,
+//   userId,
+//   orderId,
+//   productId,
+// }: InvalidateCacheProps) => {
+//   if (review) {
+//     await redis.del([`reviews-${productId}`]);
+//   }
+
+//   if (product) {
+//     const productKeys: string[] = [
+//       "latest-products",
+//       "categories",
+//       "all-products",
+//     ];
+
+//     if (typeof productId === "string") productKeys.push(`product-${productId}`);
+
+//     if (typeof productId === "object")
+//       productId.forEach((i) => productKeys.push(`product-${i}`));
+
+//     await redis.del(...productKeys);
+//   }
+//   if (order) {
+//     const ordersKeys: string[] = [
+//       "all-orders",
+//       `my-orders-${userId}`,
+//       `order-${orderId}`,
+//     ];
+
+//     await redis.del(ordersKeys);
+//   }
+//   if (admin) {
+//     await redis.del([
+//       "admin-stats",
+//       "admin-pie-charts",
+//       "admin-bar-charts",
+//       "admin-line-charts",
+//     ]);
+//   }
+// };
 export const invalidateCache = async ({
   product,
   order,
@@ -31,40 +76,46 @@ export const invalidateCache = async ({
   orderId,
   productId,
 }: InvalidateCacheProps) => {
+  const keys: string[] = [];
+
+  // Review Invalidation
   if (review) {
-    await redis.del([`reviews-${productId}`]);
+    keys.push(`reviews-${productId}`);
   }
 
+  // Product Invalidation
   if (product) {
-    const productKeys: string[] = [
-      "latest-products",
-      "categories",
-      "all-products",
-    ];
+    keys.push("latest-products", "categories", "all-products");
 
-    if (typeof productId === "string") productKeys.push(`product-${productId}`);
+    if (typeof productId === "string") keys.push(`product-${productId}`);
 
-    if (typeof productId === "object")
-      productId.forEach((i) => productKeys.push(`product-${i}`));
-
-    await redis.del(...productKeys);
+    if (Array.isArray(productId)) {
+      productId.forEach((id) => keys.push(`product-${id}`));
+    }
   }
+
+  // Order Invalidation
   if (order) {
-    const ordersKeys: string[] = [
-      "all-orders",
-      `my-orders-${userId}`,
-      `order-${orderId}`,
-    ];
+    keys.push("all-orders");
+    
+    if (orderId) keys.push(`order-${orderId}`);
 
-    await redis.del(ordersKeys);
+    if (userId) {
+      keys.push(`my-orders-${userId}`);
+    } else {
+      const allOrderKeys = await redis.keys("my-orders-*");
+      keys.push(...allOrderKeys);
+    }
   }
+
+  // Admin Invalidation
   if (admin) {
-    await redis.del([
-      "admin-stats",
-      "admin-pie-charts",
-      "admin-bar-charts",
-      "admin-line-charts",
-    ]);
+    keys.push("admin-stats", "admin-pie-charts", "admin-bar-charts", "admin-line-charts");
+  }
+
+  // Ek saath saare keys delete karein (Empty array check ke saath)
+  if (keys.length > 0) {
+    await redis.del(keys);
   }
 };
 

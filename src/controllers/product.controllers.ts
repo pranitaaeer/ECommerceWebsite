@@ -155,6 +155,7 @@ export const updateProduct = AsyncHandler(async (req, res, next) => {
     product: true,
     productId: String(product._id),
     admin: true,
+     order: true,
   });
 
   return res.status(200).json({
@@ -175,6 +176,7 @@ export const deleteProduct = AsyncHandler(async (req, res, next) => {
   await product.deleteOne();
 
   await invalidateCache({
+    order:true,
     product: true,
     productId: String(product._id),
     admin: true,
