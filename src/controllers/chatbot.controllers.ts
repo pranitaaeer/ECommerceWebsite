@@ -1,139 +1,181 @@
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  BaseMessage,
+  HumanMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
 import { StateGraph, Annotation } from "@langchain/langgraph";
-import { tool } from "@langchain/core/tools";
-import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { AsyncHandler } from "../middlewares/error.js"; 
-import ErrorHandler from "../utils/utility-class.js"; 
+import { AsyncHandler } from "../middlewares/error.js";
+import ErrorHandler from "../utils/utility-class.js";
 import "dotenv/config";
-import { Product } from "../models/product.models.js";
 import { Order } from "../models/order.models.js";
+import { Product } from "../models/product.models.js";
+import { ChatGroq } from "@langchain/groq";
+import { Request, Response, NextFunction } from "express";
 
+interface OrderSummary {
+  item: string;
+  status: string;
+  total: number;
+  date: string;
+}
 
-const itemLookupTool = tool(
-  async (input: { query: string }) => {
-    try {
-      const { query } = input;
-      const items = await Product.find({
-        $or: [
-          { ProductName: { $regex: query, $options: 'i' } },
-          { category: { $regex: query, $options: 'i' } },
-          { description: { $regex: query, $options: 'i' } }
-        ]
-      }).limit(4).lean();
-      return items.length > 0 ? JSON.stringify(items) : "No products found.";
-    } catch (error: any) {
-      return `Error: ${error.message}`;
-    }
-  },
-  {
-    name: "item_lookup",
-    description: "Search for products across categories like Mobiles, Laptops, Fashion, Grocery, Fitness, etc.",
-  }
-);
-
-const orderLookupTool = tool(
-  async (input: { raw: string }) => {
-    try {
-      const parsed = JSON.parse(input.raw);
-      const user = parsed.userId;
-
-      console.log("Order Tool Input userId:", user);
-
-      const orders = await Order.find({ user }).sort({ createdAt: -1 }).limit(3).lean();
-      if (orders.length === 0) return "No recent orders found.";
-
-      const formatted = orders.map(o => ({
-        id: o._id,
-        item: o.orderItems[0]?.ProductName,
-        status: o.status
-      }));
-
-      return JSON.stringify(formatted);
-    } catch (error: any) {
-      return `Error: ${error.message}`;
-    }
-  },
-  {
-    name: "order_lookup",
-    description: "Fetch recent orders for a user ID. Input should be a JSON string containing { userId: string }.",
-  }
-);
-
-
-const tools = [itemLookupTool, orderLookupTool];
-const toolNode = new ToolNode(tools);
-
+interface ProductSummary {
+  name: string;
+  category: string;
+  price: number;
+  description: string;
+}
 
 const GraphState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: (x, y) => x.concat(y),
+    default: () => [],
+  }),
+  ordersJSON: Annotation<OrderSummary[]>({
+    reducer: (_, y) => y,
+    default: () => [],
+  }),
+  productsJSON: Annotation<ProductSummary[]>({
+    reducer: (_, y) => y,
+    default: () => [],
   }),
 });
 
-const model = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash",
-  temperature: 0.3,
-  apiKey: process.env.GOOGLE_API_KEY,
-}).bindTools(tools);
+const model = new ChatGroq({
+  apiKey: process.env.GROQ_API_KEY,
+  model: "llama-3.3-70b-versatile",
+  temperature: 0,
+});
 
 async function callModel(state: typeof GraphState.State) {
-  const instructions = `You are a smart e-commerce assistant.
-Categories: Electronics, Mobiles, Laptops, Fashion, Beauty, Toys, Appliances, Furniture, Home Decor, Books, Grocery, Fitness.
-Use 'item_lookup' for products and 'order_lookup' for orders.
-Answer in a friendly tone.`;
+  const systemMsg = state.messages.find(
+    (m) => m instanceof SystemMessage
+  ) as SystemMessage;
 
-  const messages = [
-    new HumanMessage(instructions),
-    ...state.messages
-  ];
+  const uid =
+    systemMsg?.content?.toString().replace("USER_ID:", "").trim() || "Guest";
 
-  const response = await model.invoke(messages);
+  const userMessage = state.messages
+    .filter((msg) => msg instanceof HumanMessage)
+    .map((m) => m.content)
+    .join("\n");
+
+  // Orders and Products JSON
+  const ordersJSON = state.ordersJSON || [];
+  const productsJSON = state.productsJSON || [];
+
+  const instructions = `
+You are a professional e-commerce assistant.
+
+Orders data (IDs hidden for privacy):
+${JSON.stringify(ordersJSON, null, 2)}
+
+Products data:
+${JSON.stringify(productsJSON, null, 2)}
+
+User ID: "${uid}"  // system only, do NOT show to user
+
+RULES:
+- Answer user's question strictly based on the above orders/products data.
+- Never display sensitive info (like order IDs or user ID).
+- Format answer naturally for chat.
+- Include relevant fields:
+  - Orders: item name, status, total, order date
+  - Products: name, category, price, short description
+- If user asks about a specific item, show only relevant info.
+- If no matching orders/products, reply accordingly.
+- Use friendly, professional tone.
+`;
+
+  const response = await model.invoke([
+    new SystemMessage(instructions),
+    new HumanMessage(userMessage),
+  ]);
+
   return { messages: [response] };
 }
 
 const workflow = new StateGraph(GraphState)
   .addNode("agent", callModel)
-  .addNode("tools", toolNode)
-  .addEdge("__start__", "agent")
-  .addConditionalEdges("agent", (state) => {
-    const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
-    return lastMessage.tool_calls?.length ? "tools" : "__end__";
-  })
-  .addEdge("tools", "agent");
+  .addEdge("__start__", "agent");
 
 const app = workflow.compile();
 
+export const getChatbotResponse = AsyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { message } = req.body;
+    const { id: userId } = req.query;
 
-export const getChatbotResponse = AsyncHandler(async (req, res, next) => {
-  const { message } = req.body;
-  const { id: userId } = req.query;
+    if (!message) return next(new ErrorHandler("Message is required", 400));
 
-  if (!message) {
-    return next(new ErrorHandler("Please provide a message", 400));
+    try {
+      const uid = typeof userId === "string" ? userId : "Guest";
+
+      // Fetch Orders
+      let ordersJSON: OrderSummary[] = [];
+      if (uid !== "Guest") {
+        const orders = await Order.find({ user: uid })
+          .sort({ createdAt: -1 })
+          .limit(5)
+          .lean();
+
+        ordersJSON = orders.map((o) => ({
+          item: o.orderItems?.[0]?.ProductName || "Item",
+          status: o.status || "Unknown",
+          total: o.total || 0,
+          date: new Date(o.createdAt).toLocaleDateString(),
+        }));
+      }
+
+      // Fetch Products (basic example: top 10 products)
+      const products = await Product.find({})
+        .limit(10)
+        .lean();
+
+      const productsJSON: ProductSummary[] = products.map((p) => ({
+        name: p.ProductName || "Product",
+        category: p.category || "General",
+        price: p.price || 0,
+        description: p.description
+          ? p.description.slice(0, 60) + "..."
+          : "No description available.",
+      }));
+
+      const result = await app.invoke(
+        {
+          messages: [
+            new SystemMessage(`USER_ID: ${uid}`),
+            new HumanMessage(message),
+          ],
+          ordersJSON,
+          productsJSON,
+        },
+        { recursionLimit: 25 }
+      );
+
+      let finalReply = "";
+      for (let i = result.messages.length - 1; i >= 0; i--) {
+        const msg = result.messages[i];
+        if (msg.content && typeof msg.content === "string" && msg.content.trim()) {
+          finalReply = msg.content;
+          break;
+        }
+      }
+
+
+      const isAskingOrders = /order|status|track/i.test(message);
+      const isAskingProducts = /product|show|buy|item|price/i.test(message);
+
+      return res.status(200).json({
+        success: true,
+        reply: finalReply || "I am not sure how to answer that.",
+        orders: isAskingOrders ? ordersJSON : [], 
+        products: isAskingProducts ? productsJSON : []
+      });
+    } catch (err: any) {
+      console.error(err);
+      return next(new ErrorHandler(err.message, 500));
+    }
   }
-
-  try {
-    // Yaha hum userId ko message ke saath HumanMessage me bhej rahe hain
-    // Tool ke andar input.raw me ye JSON parse hoke use hoga
-    const userMessage = new HumanMessage(JSON.stringify({
-      userId: userId || "Guest",
-      text: message
-    }));
-
-    const result = await app.invoke({
-      messages: [userMessage]
-    });
-
-    const finalReply = result.messages[result.messages.length - 1].content;
-
-    return res.status(200).json({
-      success: true,
-      reply: finalReply,
-    });
-
-  } catch (error: any) {
-    return next(new ErrorHandler(error.message || "Chatbot Error", 500));
-  }
-});
-
+);
