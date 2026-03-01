@@ -16,7 +16,7 @@ const app = express.Router();
 app.post("/create", createPaymentIntent);
 
 // route - /api/v1/payment/discount
-app.get("/discount", applyDiscount);
+app.post("/discount", applyDiscount);
 
 // route - /api/v1/payment/coupon/new
 app.post("/coupon/new", adminOnly, newCoupon);
@@ -32,3 +32,4 @@ app
   .delete(adminOnly, deleteCoupon);
 
 export default app;
+
