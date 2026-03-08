@@ -190,7 +190,7 @@ export const deleteProduct = AsyncHandler(async (req, res, next) => {
 
 export const getAllProducts = AsyncHandler(async (req, res, next) => {
     const { search, sort, category, price }:SearchRequestQuery = req.query;
-
+   console.log("search:",search)
     const page = Number(req.query.page) || 1;
 
     const key = `products-${search}-${sort}-${category}-${price}-${page}`;
@@ -212,7 +212,7 @@ export const getAllProducts = AsyncHandler(async (req, res, next) => {
       const baseQuery: BaseQuery = {};
 
       if (search)
-        baseQuery.name = {
+        baseQuery.ProductName = {
           $regex: search,
           $options: "i",
         };
@@ -276,6 +276,8 @@ export const newReview = AsyncHandler(async (req, res, next) => {
   const user = await User.findById(id);
 
   if (!user) return next(new ErrorHandler("Not Logged In", 404));
+ 
+  if(user.role !== "user") return next(new ErrorHandler("Only User can add review", 401))
 
   const product = await Product.findById(req.params.productId);
   if (!product) return next(new ErrorHandler("Product Not Found", 404));
@@ -328,6 +330,7 @@ export const deleteReview = AsyncHandler(async (req, res, next) => {
   const user = await User.findById(id);
 
   if (!user) return next(new ErrorHandler("Not Logged In", 404));
+  if(user.role !== "user") return next(new ErrorHandler("Only User can delete review", 401))
 
   const review = await Review.findById(req.params.reviewId);
   if (!review) return next(new ErrorHandler("Review Not Found", 404));

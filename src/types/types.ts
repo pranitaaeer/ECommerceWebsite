@@ -63,7 +63,7 @@ export type SearchRequestQuery = {
 };
 
 export interface BaseQuery {
-  name?: {
+  ProductName?: {
     $regex: string;
     $options: string;
   };
