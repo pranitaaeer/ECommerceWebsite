@@ -190,7 +190,6 @@ export const deleteProduct = AsyncHandler(async (req, res, next) => {
 
 export const getAllProducts = AsyncHandler(async (req, res, next) => {
     const { search, sort, category, price }:SearchRequestQuery = req.query;
-   console.log("search:",search)
     const page = Number(req.query.page) || 1;
 
     const key = `products-${search}-${sort}-${category}-${price}-${page}`;
@@ -201,7 +200,6 @@ export const getAllProducts = AsyncHandler(async (req, res, next) => {
     const cachedData = await redis.get(key);
     if (cachedData) {
       const data = JSON.parse(cachedData);
-      console.log("data:", data)
       totalPage = data.totalPage;
       products = data.products;
     } else {
@@ -239,6 +237,7 @@ export const getAllProducts = AsyncHandler(async (req, res, next) => {
 
       await redis.setex(key, 30, JSON.stringify({ products, totalPage }));
     }
+ 
 
     return res.status(200).json({
       success: true,
@@ -259,7 +258,7 @@ export const allReviewsOfProduct = AsyncHandler(async (req, res, next) => {
     reviews = await Review.find({
       product: req.params.productId,
     })
-      .populate("user", "name Avatar")
+      .populate("user", "username Avatar")
       .sort({ updatedAt: -1 });
 
     await redis.setex(key, redisTTL, JSON.stringify(reviews));

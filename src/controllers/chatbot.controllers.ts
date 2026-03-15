@@ -164,13 +164,24 @@ export const getChatbotResponse = AsyncHandler(
       }
 
 
-      const isAskingOrders = /order|status|track/i.test(message);
-      const isAskingProducts = /product|show|buy|item|price/i.test(message);
+      const query = message.toLowerCase().trim();
+
+      const isAskingOrders =
+        query.includes("show orders") ||
+        query.includes("my orders") ||
+        query.includes("order status") ||
+        query.includes("track order") ||
+        query.includes("cancel order");
+
+      const isAskingProducts =
+        query.includes("show products") ||
+        query.includes("browse products") ||
+        query.includes("list products");
 
       return res.status(200).json({
         success: true,
         reply: finalReply || "I am not sure how to answer that.",
-        orders: isAskingOrders ? ordersJSON : [], 
+        orders: isAskingOrders ? ordersJSON : [],
         products: isAskingProducts ? productsJSON : []
       });
     } catch (err: any) {
