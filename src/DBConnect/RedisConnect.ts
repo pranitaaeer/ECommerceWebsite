@@ -14,11 +14,11 @@ export const connectRedis = (redisURI: string) => {
 
 // export const connectRedis = async () => {
 // const client = createClient({
-//     username: 'default',
+//     username: '<your username>',
 //     password: '<your password>',
 //     socket: {
-//         host: 'your hostname',
-//         port: <your port>
+//         host: '<your host>',
+//         port: 'your port'
 //     }
 // });
 
