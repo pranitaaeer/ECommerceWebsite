@@ -5,8 +5,6 @@ import ErrorHandler from "../utils/utility-class.js";
 
 export const newUser = AsyncHandler(async (req,res,next) => {
     const { username, email, Avatar, gender, _id, dob }:SignupRequestBody = req.body;
-    console.log("req.body:", req.body)
-    console.log(username, email, Avatar, gender, _id, dob)
     let user = await User.findById(_id);
 
     if (user)
