@@ -86,10 +86,8 @@ export const getSingleProduct = AsyncHandler(async (req, res, next) => {
 export const newProduct = AsyncHandler(async (req, res, next) => {
 
     const { ProductName, price, stock, category, description }:ProductRequestBody= req.body;
-    console.log("body:",req.body)
 
     const ProductImage = req.files as Express.Multer.File[] | undefined;
-    console.log("Image:",ProductImage)
     if (!ProductImage) return next(new ErrorHandler("Please add Photo", 400));
 
     if (ProductImage.length < 1)
@@ -104,7 +102,6 @@ export const newProduct = AsyncHandler(async (req, res, next) => {
     // Upload Here
 
     const photosURL = await uploadToCloudinary(ProductImage);
-    console.log("cloudinary response:",photosURL)
 
     await Product.create({
       ProductName,
@@ -137,7 +134,6 @@ export const updateProduct = AsyncHandler(async (req, res, next) => {
     const photosURL = await uploadToCloudinary(ProductImage);
 
     const ids = product.ProductImage.map((photo) => photo.public_id);
-    console.log("photo ids:", ids)
     await deleteFromCloudinary(ids);
 
     product.ProductImage= photosURL as IProductImage[] ;
@@ -334,7 +330,6 @@ export const deleteReview = AsyncHandler(async (req, res, next) => {
   const review = await Review.findById(req.params.reviewId);
   if (!review) return next(new ErrorHandler("Review Not Found", 404));
 
-  console.log("user:", review.user, "userId:", user._id)
   const isAuthenticateUser = review.user.toString() === user._id.toString();
 
   if (!isAuthenticateUser) return next(new ErrorHandler("Not Authorized", 401));

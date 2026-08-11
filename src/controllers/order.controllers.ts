@@ -15,7 +15,6 @@ export const myOrders = AsyncHandler(async (req, res, next) => {
   let orders;
 
   orders = await redis.get(key);
-  console.log("JSON Parse:", orders && JSON.parse(orders))
   if (orders) orders = JSON.parse(orders);
 
   else {

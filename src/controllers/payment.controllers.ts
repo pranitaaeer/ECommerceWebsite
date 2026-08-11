@@ -71,7 +71,6 @@ export const createPaymentIntent = AsyncHandler(async (req, res, next) => {
 
 export const newCoupon = AsyncHandler(async (req, res, next) => {
   const { code, amount }:CouponRequestBody = req.body;
-  console.log("data:", req.body);
   if (!code || !amount)
     return next(new ErrorHandler("Please enter both coupon code and amount", 400));
 
@@ -85,7 +84,6 @@ export const newCoupon = AsyncHandler(async (req, res, next) => {
 
 export const applyDiscount = AsyncHandler(async (req, res, next) => {
   const { coupon } = req.query;
-  console.log("coupon:",coupon)
   const discount = await Coupon.findOne({ code: coupon });
 
   if (!discount) return next(new ErrorHandler("Invalid Coupon Code", 400));
@@ -141,7 +139,6 @@ export const updateCoupon = AsyncHandler(async (req, res, next) => {
 
 export const deleteCoupon = AsyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  console.log("id:",id)
   const coupon = await Coupon.findByIdAndDelete(id);
 
   if (!coupon) return next(new ErrorHandler("Invalid Coupon ID", 400));
